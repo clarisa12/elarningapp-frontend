@@ -7,8 +7,10 @@ export const Sidebar = (props) => {
     return (
         <div style={{ backgroundColor: "#111", width: "100px" }}>
             <Nav defaultActiveKey="/home" className="flex-column">
-                {props.workgroups.map((name) => (
-                    <Nav.Link href="/home">{name}</Nav.Link>
+                {props.workgroups.map((w) => (
+                    <Nav.Link key={w.wrkID} href="/home">
+                        {w.wkrName}
+                    </Nav.Link>
                 ))}
             </Nav>
         </div>

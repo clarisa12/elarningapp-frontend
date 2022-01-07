@@ -1,30 +1,19 @@
-import { Fragment } from "react";
-import {
-    Button,
-    Container,
-    Card,
-    Row,
-    Col,
-    Navbar,
-    Nav,
-} from "react-bootstrap";
+import { Fragment, useEffect, useState } from "react";
+import { Container, Card, Row, Col } from "react-bootstrap";
 import { Sidebar } from "../Components/Sidebar";
-
+import { TopNav } from "../Components/TopNav";
+import { api } from "../api";
 export const Dashboard = () => {
+    const [workgroups, setWorksgroups] = useState([]);
+    useEffect(() => {
+        api("/workgroups").then((w) => setWorksgroups(w));
+    }, []);
+
     return (
         <Fragment>
-            <Navbar bg="dark" variant="dark">
-                <Container>
-                    <Navbar.Brand href="#home">Navbar</Navbar.Brand>
-                    <Nav className="me-auto">
-                        <Nav.Link href="#home">Home</Nav.Link>
-                        <Nav.Link href="#features">Features</Nav.Link>
-                        <Nav.Link href="#pricing">Pricing</Nav.Link>
-                    </Nav>
-                </Container>
-            </Navbar>
+            <TopNav />
             <div style={{ display: "flex", height: "100vh" }}>
-                <Sidebar workgroups={["aaa", "bbb", "cccc"]} />
+                <Sidebar workgroups={workgroups} />
                 <Container>
                     <Row xs={1} md={2} className="g-4">
                         {Array.from({ length: 4 }).map((_, idx) => (
