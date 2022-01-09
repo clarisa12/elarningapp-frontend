@@ -6,9 +6,6 @@ export const TopNav = () => {
         <Navbar bg="dark" variant="dark">
             <Container>
                 <Navbar.Brand href="#home">Elearning</Navbar.Brand>
-                <Nav className="me-auto">
-                    <Nav.Link href="#home">Home</Nav.Link>
-                </Nav>
                 <Navbar.Collapse className="justify-content-end">
                     <img
                         src="https://www.w3schools.com/howto/img_avatar2.png"

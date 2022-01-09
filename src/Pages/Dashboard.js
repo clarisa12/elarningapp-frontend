@@ -5,6 +5,7 @@ import { TopNav } from "../Components/TopNav";
 import { api } from "../api";
 import { AssignmentCard } from "../Components/AssignmentCard";
 import { CreateAssignmentModal } from "../Components/CreateAssignmentModal";
+import { Link } from "react-router-dom";
 
 export const Dashboard = () => {
     const [workgroups, setWorksgroups] = useState([]);
@@ -12,7 +13,6 @@ export const Dashboard = () => {
 
     // Create Assignment Modal
     const [showAssignmentModal, setShowAssignmentModal] = useState(false);
-
     const [assignments, setAssignments] = useState([]);
 
     useEffect(() => {
@@ -41,8 +41,7 @@ export const Dashboard = () => {
             .then((wg) => {
                 setSelectedWg(wg);
                 setAssignments(wg.wrkAssig);
-
-                setShowAssignmentModal(false);
+                closeAssignmentModal(false);
             })
             .catch((e) => console.error(e));
     }
@@ -51,14 +50,18 @@ export const Dashboard = () => {
         <Fragment>
             <TopNav />
             <div style={{ display: "flex", height: "100vh" }}>
-                <Sidebar onWgChange={onWgChange} workgroups={workgroups} />
+                <Sidebar
+                    onWgChange={onWgChange}
+                    workgroups={workgroups}
+                    selectedWg={selectedWg}
+                />
                 <CreateAssignmentModal
                     show={showAssignmentModal}
                     saveAssignment={saveAssignment}
                     handleClose={closeAssignmentModal}
                 />
-                <Container>
-                    <Row xs={1} md={2} className="g-4">
+                <Container style={{ marginTop: "24px" }}>
+                    <Row xs={1} md={3} className="g-4">
                         {!selectedWg && (
                             <h1>Nothing to show, select a workgroup</h1>
                         )}
@@ -79,7 +82,9 @@ export const Dashboard = () => {
 
                         {assignments.map((a) => (
                             <Col>
-                                <AssignmentCard assignment={a} />
+                                <Link to={`/assignment/${a.assigId}`}>
+                                    <AssignmentCard assignment={a} />
+                                </Link>
                             </Col>
                         ))}
                     </Row>

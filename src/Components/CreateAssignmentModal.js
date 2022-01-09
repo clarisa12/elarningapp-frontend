@@ -4,14 +4,16 @@ import { Form, Modal, Dropdown, Button } from "react-bootstrap";
 import { makeAssignment } from "../models/assignment";
 export function CreateAssignmentModal(props) {
     // Assignment State
-    const [assignmentName, setAssignmentName] = useState();
-    const [assignmentState, setAssignmentState] = useState();
+    const [name, setName] = useState();
+    const [assigState, setAssigState] = useState();
     const [startDate, setStartDate] = useState();
     const [endDate, setEndDate] = useState();
 
-    function handleAssignmentState(e) {
-        e.preventDefault();
-        console.log(e);
+    function clear() {
+        setName("");
+        setAssigState(null);
+        setStartDate();
+        setEndDate();
     }
 
     return (
@@ -21,27 +23,19 @@ export function CreateAssignmentModal(props) {
             </Modal.Header>
             <Modal.Body>
                 <Form>
-                    <Form.Group
-                        className="mb-3"
-                        controlId="exampleForm.ControlInput1"
-                    >
+                    <Form.Group className="mb-3">
                         <Form.Label>Assignment Name</Form.Label>
                         <Form.Control
                             type="text"
                             placeholder="Assignment 1"
-                            onChange={(e) => setAssignmentName(e.target.value)}
-                            value={assignmentName}
+                            onChange={(e) => setName(e.target.value)}
+                            value={name}
                         />
                     </Form.Group>
-                    <Form.Group
-                        className="mb-3"
-                        controlId="exampleForm.ControlTextarea1"
-                    >
+                    <Form.Group className="mb-3">
                         <Form.Label>Assignment State</Form.Label>
-
                         <Form.Select
-                            aria-label="Default select example"
-                            onChange={setAssignmentState}
+                            onChange={(e) => setAssigState(e.target.value)}
                         >
                             <option>Select State</option>
                             <option value="PROPOSED">Proposed</option>
@@ -66,21 +60,23 @@ export function CreateAssignmentModal(props) {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={props.handleClose}>
+                <Button
+                    variant="secondary"
+                    onClick={() => {
+                        clear();
+                        props.handleClose();
+                    }}
+                >
                     Close
                 </Button>
                 <Button
                     variant="primary"
-                    onClick={() =>
+                    onClick={() => {
+                        clear();
                         props.saveAssignment(
-                            makeAssignment(
-                                assignmentName,
-                                assignmentState,
-                                startDate,
-                                endDate
-                            )
-                        )
-                    }
+                            makeAssignment(name, assigState, startDate, endDate)
+                        );
+                    }}
                 >
                     Save Assignment
                 </Button>

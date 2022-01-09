@@ -1,0 +1,11 @@
+.wg-container {
+    padding: 8px;
+    margin: 12px 0;
+    color: white;
+    cursor: pointer;
+}
+
+.wg-container.selected {
+    background-color: aquamarine;
+    color: #111;
+}
