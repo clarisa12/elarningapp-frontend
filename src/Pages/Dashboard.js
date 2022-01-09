@@ -1,38 +1,85 @@
 import { Fragment, useEffect, useState } from "react";
-import { Container, Card, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
 import { Sidebar } from "../Components/Sidebar";
 import { TopNav } from "../Components/TopNav";
 import { api } from "../api";
+import { AssignmentCard } from "../Components/AssignmentCard";
+import { CreateAssignmentModal } from "../Components/CreateAssignmentModal";
+
 export const Dashboard = () => {
     const [workgroups, setWorksgroups] = useState([]);
+    const [selectedWg, setSelectedWg] = useState(null);
+
+    // Create Assignment Modal
+    const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+
+    const [assignments, setAssignments] = useState([]);
+
     useEffect(() => {
-        api("/workgroups").then((w) => setWorksgroups(w));
+        api.get("/workgroups").then((w) => setWorksgroups(w));
     }, []);
+
+    function onWgChange(wg) {
+        setSelectedWg(wg);
+
+        api.get(`/workgroups/${wg.wrkId}`).then(({ wrkAssig }) =>
+            setAssignments(wrkAssig)
+        );
+    }
+
+    function closeAssignmentModal() {
+        setShowAssignmentModal(false);
+    }
+    function saveAssignment(newAssig) {
+        // api.post("/assignments", { ...newAssig, assigWorkgroup: selectedWg })
+        //     .then(
+        api.put(`/workgroups/${selectedWg.wrkId}`, {
+            ...selectedWg,
+            wrkAssig: [...selectedWg.wrkAssig, newAssig],
+        })
+            // )
+            .then((wg) => {
+                setSelectedWg(wg);
+                setAssignments(wg.wrkAssig);
+
+                setShowAssignmentModal(false);
+            })
+            .catch((e) => console.error(e));
+    }
 
     return (
         <Fragment>
             <TopNav />
             <div style={{ display: "flex", height: "100vh" }}>
-                <Sidebar workgroups={workgroups} />
+                <Sidebar onWgChange={onWgChange} workgroups={workgroups} />
+                <CreateAssignmentModal
+                    show={showAssignmentModal}
+                    saveAssignment={saveAssignment}
+                    handleClose={closeAssignmentModal}
+                />
                 <Container>
                     <Row xs={1} md={2} className="g-4">
-                        {Array.from({ length: 4 }).map((_, idx) => (
+                        {!selectedWg && (
+                            <h1>Nothing to show, select a workgroup</h1>
+                        )}
+                        {selectedWg && (
                             <Col>
-                                <Card>
-                                    <Card.Img
-                                        variant="top"
-                                        src="holder.js/100px160"
-                                    />
+                                <Card
+                                    onClick={() => setShowAssignmentModal(true)}
+                                >
                                     <Card.Body>
-                                        <Card.Title>Card title</Card.Title>
-                                        <Card.Text>
-                                            This is a longer card with
-                                            supporting text below as a natural
-                                            lead-in to additional content. This
-                                            content is a little bit longer.
-                                        </Card.Text>
+                                        <Card.Title>
+                                            Create Assignment
+                                        </Card.Title>
+                                        <Card.Text>+</Card.Text>
                                     </Card.Body>
                                 </Card>
+                            </Col>
+                        )}
+
+                        {assignments.map((a) => (
+                            <Col>
+                                <AssignmentCard assignment={a} />
                             </Col>
                         ))}
                     </Row>

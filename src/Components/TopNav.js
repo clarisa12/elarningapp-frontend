@@ -13,7 +13,7 @@ export const TopNav = () => {
                     <img
                         src="https://www.w3schools.com/howto/img_avatar2.png"
                         alt="Avatar"
-                        class="avatar"
+                        className="avatar"
                     />
                 </Navbar.Collapse>
             </Container>

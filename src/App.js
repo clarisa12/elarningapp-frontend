@@ -11,6 +11,7 @@ function App() {
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                {/* <Route path="/assignment:id" element={<AssignmentDetail />} /> */}
 
                 <Route path="*" element={<NotFound />} />
             </Routes>
