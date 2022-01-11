@@ -8,8 +8,9 @@ export function TaskCard({
     setDescription,
     canEdit = true,
     editing = false,
+    onClick,
 }) {
-    const [editing, setEditing] = useState(props.editing);
+    const [editingState, setEditing] = useState(editing);
     const [value, setValue] = useState();
 
     function onChange(e) {
@@ -17,7 +18,7 @@ export function TaskCard({
     }
 
     return (
-        <div class="card">
+        <div class="card" onClick={onClick}>
             <p>{description}</p>
             {canEdit && (
                 <FaPencilAlt
@@ -26,7 +27,7 @@ export function TaskCard({
                 />
             )}
 
-            {editing && (
+            {editingState && (
                 <Fragment>
                     <input
                         type="text"
