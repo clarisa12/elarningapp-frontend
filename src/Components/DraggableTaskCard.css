@@ -1,0 +1,21 @@
+.card {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    overflow-wrap: anywhere;
+    min-height: 60px;
+    margin: 16px 0;
+    cursor: grab;
+}
+
+.editing {
+    display: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.card:hover .editing {
+    display: block;
+}

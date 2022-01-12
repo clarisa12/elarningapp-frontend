@@ -1,29 +1,121 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useCallback, useReducer, useState } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { TopNav } from "../Components/TopNav";
 import { api } from "../api";
-import { TaskCard } from "../Components/TaskCard";
+import { AddTaskCard } from "../Components/AddTaskCard";
+import { DraggableTaskCard } from "../Components/DraggableTaskCard";
+import { produce, current } from "immer";
+import "./AssignmentDetail.css";
+
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const proposed = "PROPOSED";
 const inExecution = "IN_EXECUTION";
 const completed = "COMPLETED";
 
 export const AssignmentDetail = () => {
-    const [tasks, setTasks] = useState({
-        [proposed]: [],
-        [inExecution]: [],
-        [completed]: [],
+    const [dragging, setDragging] = useState(false);
+    const [assig, setAssig] = useState({});
+    const dragReducer = produce((draft, action) => {
+        switch (action.type) {
+            case "LOAD":
+                {
+                    const a = action.data.filter(
+                        (a) => a.assigState === proposed
+                    );
+                    const b = action.data.filter(
+                        (a) => a.assigState === inExecution
+                    );
+                    const c = action.data.filter(
+                        (a) => a.assigState === completed
+                    );
+
+                    draft.items[proposed] = a;
+                    draft.items[inExecution] = b;
+                    draft.items[completed] = c;
+                }
+                break;
+            case "MOVE":
+                {
+                    draft.items[action.from] = draft.items[action.from] || [];
+                    draft.items[action.to] = draft.items[action.to] || [];
+                    const [removed] = draft.items[action.from].splice(
+                        action.fromIndex,
+                        1
+                    );
+                    draft.items[action.to].splice(action.toIndex, 0, removed);
+                }
+                break;
+            case "START_TASK":
+                const d = current(draft.items[action.state]);
+                draft.items[action.state] = [
+                    ...d,
+                    {
+                        tskState: action.state,
+                        editing: true,
+                        description: "",
+                        _id: id(),
+                    },
+                ];
+
+                break;
+
+            case "UPDATE_DESCRIPTION":
+                {
+                    const d = current(draft.items[action.state]);
+
+                    const t1 = d.filter((t) => t._id !== action.id);
+                    const item = d.find((t) => t._id === action.id);
+
+                    const a = {
+                        ...item,
+                        description: action.description,
+                        editing: false,
+                    };
+
+                    draft.items[action.state] = [...t1, a];
+
+                    createTask(a);
+                }
+                break;
+
+            default:
+                return state;
+        }
     });
-    const [assig, setAssig] = useState();
 
-    const assigId = window.location.pathname.split("/").pop();
+    const [state, dispatch] = useReducer(dragReducer, {
+        items: {
+            [proposed]: [],
+            [inExecution]: [],
+            [completed]: [],
+        },
+    });
 
-    // useEffect(() => {
-    //     api.get(`/assignments/${assigId}`).then((assig) => {
-    //         setAssig(assig);
-    //         setTasks(assig.assigTasks);
-    //     });
-    // }, []);
+    const onDragEnd = useCallback((result) => {
+        setDragging(false);
+        if (result.reason === "DROP") {
+            if (!result.destination) {
+                return;
+            }
+            dispatch({
+                type: "MOVE",
+                from: result.source.droppableId,
+                to: result.destination.droppableId,
+                fromIndex: result.source.index,
+                toIndex: result.destination.index,
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        const assigId = window.location.pathname.split("/").pop();
+
+        api.get(`/assignments/${assigId}`).then((assig) => {
+            setAssig(assig);
+            dispatch({ type: "LOAD", data: assig.assigTask });
+        });
+    }, []);
 
     function updateTaskState(newTask) {
         api.put(`/task/${newTask.tskId}`, newTask).then(() => {
@@ -32,95 +124,98 @@ export const AssignmentDetail = () => {
     }
 
     function createTask(newTask) {
-        api.post(`/assignments/${assigId}`, newTask).then(() => {
+        const assigId = window.location.pathname.split("/").pop();
+
+        api.post(`/assignments/${assigId}`, {
+            ...assig,
+            assigTask: [...assig.assigTask, newTask],
+        }).then(() => {
             console.log("success");
         });
     }
 
     function startTask(state) {
-        setTasks({
-            ...tasks,
-            [state]: [
-                ...tasks[state],
-                { tskState: state, editing: true, description: "", _id: id() },
-            ],
-        });
+        dispatch({ type: "START_TASK", state });
     }
 
     function setDescription(state, id) {
         return (description) => {
-            const t1 = tasks[state].filter((t) => t._id !== id);
-            const item = tasks[state].find((t) => t._id === id);
-            item.description = description;
-            item.editing = false;
-            setTasks({
-                ...tasks,
-                [state]: [...t1, item],
-            });
+            dispatch({ type: "UPDATE_DESCRIPTION", state, id, description });
         };
     }
 
     function id() {
-        return Date.now();
+        return String(Date.now());
     }
 
     return (
         <Fragment>
             <TopNav />
             <Container style={{ marginTop: "24px" }}>
-                <h2>{}</h2>
-                <Row md={3} className="g-4">
-                    <Col style={{ borderRight: "2px dotted #eee" }}>
-                        <h3>Assigned</h3>
-                        {tasks["PROPOSED"].map((t) => (
-                            <TaskCard
-                                setDescription={setDescription(proposed, t._id)}
-                                description={t.description}
-                                editing={t.editing}
-                            />
-                        ))}
-                        <TaskCard
-                            description="+"
-                            canEdit={false}
-                            onClick={() => startTask(proposed)}
-                        />
-                    </Col>
-                    <Col style={{ borderRight: "2px dotted #eee" }}>
-                        <h3>In Progress</h3>
-                        {tasks[inExecution].map((t) => (
-                            <TaskCard
-                                setDescription={setDescription(
-                                    inExecution,
-                                    t._id
-                                )}
-                                description={t.description}
-                                editing={t.editing}
-                            />
-                        ))}
-                        <TaskCard
-                            description="+"
-                            canEdit={false}
-                            onClick={() => startTask(inExecution)}
-                        />
-                    </Col>
-                    <Col>
-                        <h3>Completed</h3>
-                        {tasks[completed].map((t) => (
-                            <TaskCard
-                                setDescription={setDescription(
-                                    completed,
-                                    t._id
-                                )}
-                                description={t.description}
-                                editing={t.editing}
-                            />
-                        ))}
-                        <TaskCard
-                            description="+"
-                            canEdit={false}
-                            onClick={() => startTask(completed)}
-                        />
-                    </Col>
+                <h2>some project</h2>
+                <Row md={3} className="g-4" style={{ height: "100vh" }}>
+                    <DragDropContext
+                        onDragStart={() => setDragging(true)}
+                        onDragEnd={onDragEnd}
+                    >
+                        {[proposed, inExecution, completed].map((s) => {
+                            return (
+                                <Col
+                                    key={s}
+                                    style={{ borderRight: "2px dotted #eee" }}
+                                >
+                                    <h3>{s}</h3>
+
+                                    <AddTaskCard onClick={() => startTask(s)} />
+                                    <Droppable droppableId={s}>
+                                        {(provided, snapshot) => {
+                                            return (
+                                                <div
+                                                    style={{ height: "100%" }}
+                                                    className={`drop ${
+                                                        dragging
+                                                            ? "dragging"
+                                                            : ""
+                                                    }`}
+                                                    ref={provided.innerRef}
+                                                >
+                                                    {state.items[s].map(
+                                                        (t, index) => (
+                                                            <Draggable
+                                                                draggableId={
+                                                                    t._id
+                                                                }
+                                                                key={t._id}
+                                                                index={index}
+                                                            >
+                                                                {(provided) => (
+                                                                    <DraggableTaskCard
+                                                                        innerRef={
+                                                                            provided.innerRef
+                                                                        }
+                                                                        {...provided.draggableProps}
+                                                                        {...provided.dragHandleProps}
+                                                                        setDescription={setDescription(
+                                                                            s,
+                                                                            t._id
+                                                                        )}
+                                                                        task={t}
+                                                                        index={
+                                                                            index
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </Draggable>
+                                                        )
+                                                    )}
+                                                </div>
+                                            );
+                                        }}
+                                    </Droppable>
+                                </Col>
+                            );
+                        })}
+                    </DragDropContext>
                 </Row>
             </Container>
         </Fragment>
