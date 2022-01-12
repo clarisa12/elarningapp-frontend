@@ -22,7 +22,7 @@ export function DraggableTaskCard(props) {
         >
             {!editingState && (
                 <p style={{ margin: 0, textAlign: "left" }}>
-                    {props.task.description}
+                    {props.task.tskDescription}
                 </p>
             )}
             {!editingState && (
@@ -35,7 +35,7 @@ export function DraggableTaskCard(props) {
                     <input
                         type="text"
                         onChange={onChange}
-                        value={value || props.task.description}
+                        value={value || props.task.tskDescription}
                     />
                     <Button
                         variant="primary"
@@ -43,7 +43,7 @@ export function DraggableTaskCard(props) {
                         onClick={() => {
                             setEditing(false);
                             props.setDescription(
-                                value || props.task.description
+                                value || props.task.tskDescription
                             );
                         }}
                     >

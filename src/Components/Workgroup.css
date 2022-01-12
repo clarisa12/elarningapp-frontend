@@ -1,0 +1,19 @@
+.wg-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px;
+    padding-left: 12px;
+    text-align: center;
+}
+
+.wg-container .editing {
+    display: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.wg-container:hover .editing {
+    display: block;
+}

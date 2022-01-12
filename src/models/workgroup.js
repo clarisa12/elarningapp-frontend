@@ -1,5 +1,5 @@
-const makeWorkgroup = (name, assignments, students) => ({
+const makeWorkgroup = (name) => ({
     wrkName: name,
-    wrkList: assignments,
-    wrkAssig: students,
+    wrkList: null,
+    wrkAssig: null,
 });

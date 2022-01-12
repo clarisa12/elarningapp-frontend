@@ -21,13 +21,13 @@ export const AssignmentDetail = () => {
             case "LOAD":
                 {
                     const a = action.data.filter(
-                        (a) => a.assigState === proposed
+                        (a) => a.tskState === proposed
                     );
                     const b = action.data.filter(
-                        (a) => a.assigState === inExecution
+                        (a) => a.tskState === inExecution
                     );
                     const c = action.data.filter(
-                        (a) => a.assigState === completed
+                        (a) => a.tskState === completed
                     );
 
                     draft.items[proposed] = a;
@@ -44,6 +44,8 @@ export const AssignmentDetail = () => {
                         1
                     );
                     draft.items[action.to].splice(action.toIndex, 0, removed);
+
+                    updateTaskState();
                 }
                 break;
             case "START_TASK":
@@ -53,7 +55,11 @@ export const AssignmentDetail = () => {
                     {
                         tskState: action.state,
                         editing: true,
-                        description: "",
+                        tskDescription: "",
+                        tskStartDate: "2022-03-01",
+                        tskEndDate: "2022-04-01",
+                        tskStudResponsible: null,
+                        tskAssig: null,
                         _id: id(),
                     },
                 ];
@@ -69,7 +75,7 @@ export const AssignmentDetail = () => {
 
                     const a = {
                         ...item,
-                        description: action.description,
+                        tskDescription: action.tskDescription,
                         editing: false,
                     };
 
@@ -118,15 +124,15 @@ export const AssignmentDetail = () => {
     }, []);
 
     function updateTaskState(newTask) {
-        api.put(`/task/${newTask.tskId}`, newTask).then(() => {
-            console.log("success");
-        });
+        // api.put(`/task/${newTask.tskId}`, newTask).then(() => {
+        //     console.log("success");
+        // });
     }
 
     function createTask(newTask) {
         const assigId = window.location.pathname.split("/").pop();
 
-        api.post(`/assignments/${assigId}`, {
+        api.put(`/assignments/${assigId}`, {
             ...assig,
             assigTask: [...assig.assigTask, newTask],
         }).then(() => {
@@ -140,7 +146,12 @@ export const AssignmentDetail = () => {
 
     function setDescription(state, id) {
         return (description) => {
-            dispatch({ type: "UPDATE_DESCRIPTION", state, id, description });
+            dispatch({
+                type: "UPDATE_DESCRIPTION",
+                state,
+                id,
+                tskDescription: description,
+            });
         };
     }
 
@@ -183,9 +194,17 @@ export const AssignmentDetail = () => {
                                                         (t, index) => (
                                                             <Draggable
                                                                 draggableId={
-                                                                    t._id
+                                                                    t._id ||
+                                                                    String(
+                                                                        t.tskId
+                                                                    )
                                                                 }
-                                                                key={t._id}
+                                                                key={
+                                                                    t._id ||
+                                                                    String(
+                                                                        t.tskId
+                                                                    )
+                                                                }
                                                                 index={index}
                                                             >
                                                                 {(provided) => (

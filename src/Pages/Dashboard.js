@@ -20,6 +20,7 @@ export const Dashboard = () => {
     }, []);
 
     function onWgChange(wg) {
+        if (wg.editing) return;
         setSelectedWg(wg);
 
         api.get(`/workgroups/${wg.wrkId}`).then(({ wrkAssig }) =>
@@ -27,9 +28,39 @@ export const Dashboard = () => {
         );
     }
 
+    function createWg() {
+        setWorksgroups([
+            ...workgroups,
+            {
+                _id: Date.now(),
+                wrkName: "",
+                wrkList: null,
+                wrkAssig: null,
+                editing: true,
+            },
+        ]);
+    }
+
+    function saveWg(wg) {
+        const id = wg._id || wg.wrkId;
+        const key = wg._id ? "_id" : "wrkId";
+        const item = workgroups.find((w) => w[key] === id);
+        const other = workgroups.filter((w) => w[key] !== id);
+
+        item.wrkName = wg.wrkName;
+        setWorksgroups([...other, item]);
+
+        if (wg.wrkId) {
+            api.put(`/workgroups/${wg.wrkId}`, wg).then(console.log);
+        } else {
+            api.post("/workgroups", wg).then(console.log);
+        }
+    }
+
     function closeAssignmentModal() {
         setShowAssignmentModal(false);
     }
+
     function saveAssignment(newAssig) {
         // api.post("/assignments", { ...newAssig, assigWorkgroup: selectedWg })
         //     .then(
@@ -51,6 +82,8 @@ export const Dashboard = () => {
             <TopNav />
             <div style={{ display: "flex", height: "100vh" }}>
                 <Sidebar
+                    saveWg={saveWg}
+                    createWg={createWg}
                     onWgChange={onWgChange}
                     workgroups={workgroups}
                     selectedWg={selectedWg}

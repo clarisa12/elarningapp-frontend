@@ -1,12 +1,12 @@
 import React, { useState, Fragment } from "react";
 import { Button } from "react-bootstrap";
 
-import "./DraggableTaskCard.css";
+import "./Workgroup.css";
 
 import { FaPencilAlt, FaSave } from "react-icons/fa";
 
 export function Workgroup(props) {
-    const [editingState, setEditing] = useState(props.editing);
+    const [editingState, setEditing] = useState(props.wg.editing);
     const [value, setValue] = useState();
 
     function onChange(e) {
@@ -17,18 +17,11 @@ export function Workgroup(props) {
         <div
             onClick={() => props.onWgChange(props.wg)}
             key={props.wg.wrkId}
-            className={`wg-container ${
-                props.selectedWg && props.wg.wrkID === props.selectedWg.wrkId
-                    ? "selected"
-                    : ""
-            }`}
-            onClick={props.onClick}
-            {...props}
-            ref={props.innerRef}
+            className="wg-container"
         >
             {!editingState && (
                 <p style={{ margin: 0, textAlign: "left" }}>
-                    {props.task.description}
+                    {props.wg.wrkName}
                 </p>
             )}
             {!editingState && (
@@ -39,16 +32,20 @@ export function Workgroup(props) {
             {editingState && (
                 <Fragment>
                     <input
+                        style={{ width: "140px" }}
                         type="text"
                         onChange={onChange}
-                        value={value || props.description}
+                        value={value || props.tskDescription}
                     />
                     <Button
                         variant="primary"
                         size="sm"
                         onClick={() => {
                             setEditing(false);
-                            props.setDescription(value || props.name);
+                            props.saveWg({
+                                ...props.wg,
+                                wrkName: value || props.name,
+                            });
                         }}
                     >
                         <FaSave />
