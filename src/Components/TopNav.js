@@ -5,7 +5,7 @@ export const TopNav = () => {
     return (
         <Navbar bg="dark" variant="dark">
             <Container>
-                <Navbar.Brand href="#home">Elearning</Navbar.Brand>
+                <Navbar.Brand href="/dashboard">Elearning</Navbar.Brand>
                 <Navbar.Collapse className="justify-content-end">
                     <img
                         src="https://www.w3schools.com/howto/img_avatar2.png"

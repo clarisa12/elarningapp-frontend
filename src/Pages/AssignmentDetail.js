@@ -152,7 +152,7 @@ export const AssignmentDetail = () => {
         <Fragment>
             <TopNav />
             <Container style={{ marginTop: "24px" }}>
-                <h2>some project</h2>
+                <h2 style={{ margin: "40px auto" }}>{assig.assigName}</h2>
                 <Row md={3} className="g-4" style={{ height: "100vh" }}>
                     <DragDropContext
                         onDragStart={() => setDragging(true)}

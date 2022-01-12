@@ -63,7 +63,9 @@ export const Dashboard = () => {
                 <Container style={{ marginTop: "24px" }}>
                     <Row xs={1} md={3} className="g-4">
                         {!selectedWg && (
-                            <h1>Nothing to show, select a workgroup</h1>
+                            <h1 style={{ margin: "60px auto" }}>
+                                Nothing to show, select a workgroup
+                            </h1>
                         )}
                         {selectedWg && (
                             <Col>
